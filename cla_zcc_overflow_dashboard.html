@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLA — ZCC Overflow Reconciliation — Aug 2–29, 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --teal:     #006271;
+  --teal-lt:  #e4eff0;
+  --gold:     #e2bc5c;
+  --gold-lt:  #fdf6e3;
+  --dark:     #00272d;
+  --red:      #c0392b;
+  --red-lt:   #fee2e2;
+  --amber:    #f59e0b;
+  --amber-lt: #fef3c7;
+  --green:    #16a34a;
+  --green-lt: #dcfce7;
+  --purple:   #7c3aed;
+  --purple-lt:#f1e9fe;
+  --border:   #e4e8ec;
+  --bg:       #f4f6f8;
+  --white:    #ffffff;
+  --text:     #1a2a2d;
+  --muted:    #6b7f86;
+  --font:     'Montserrat', sans-serif;
+}
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+.header { background: var(--dark); padding: 20px 32px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.header-title { font-size: 18px; font-weight: 800; color: var(--white); letter-spacing: .04em; }
+.header-sub   { font-size: 11px; font-weight: 600; color: var(--gold); letter-spacing: .08em; text-transform: uppercase; margin-top: 2px; }
+.header-right { margin-left: auto; text-align: right; }
+.header-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(226,188,92,.15); border: 1px solid rgba(226,188,92,.3); border-radius: 20px; padding: 4px 14px; font-size: 11px; font-weight: 700; color: var(--gold); letter-spacing: .04em; }
+.alert-banner { background: var(--red-lt); border-bottom: 2px solid #fca5a5; padding: 12px 32px; display: flex; align-items: flex-start; gap: 10px; font-size: 12.5px; font-weight: 600; color: var(--red); line-height: 1.5; }
+.alert-banner b { color: #7f1d1d; }
+
+.page { padding: 24px 32px 56px; max-width: 1180px; margin: 0 auto; }
+
+.summary-row { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; margin-bottom: 22px; }
+.sc { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; border-top: 3px solid var(--gold); }
+.sc.crit { border-top-color: var(--red); }
+.sc-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 5px; }
+.sc-value { font-size: 26px; font-weight: 800; line-height: 1; }
+.sc-value.red  { color: var(--red); }
+.sc-value.teal { color: var(--teal); }
+.sc-sub   { font-size: 10px; color: var(--muted); margin-top: 4px; font-weight: 500; }
+
+.section-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--dark); margin: 26px 0 10px; display: flex; align-items: center; gap: 8px; }
+.section-title .bar { width: 4px; height: 14px; background: var(--gold); border-radius: 2px; display: inline-block; }
+
+.panel { background: var(--white); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; border-bottom: 1px solid var(--border); background: #fafbfc; }
+.panel-title  { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.panel-meta   { font-size: 10px; font-weight: 600; color: var(--muted); }
+.panel-body   { padding: 16px; }
+.chart-wrap-lg { position: relative; height: 260px; }
+
+.two-col { display: grid; grid-template-columns: 1.3fr 1fr; gap: 14px; }
+
+.qtable { width: 100%; border-collapse: collapse; font-size: 11px; }
+.qtable thead tr { background: var(--dark); }
+.qtable thead th { padding: 8px 12px; text-align: left; font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #fff; white-space: nowrap; }
+.qtable thead th.r { text-align: right; }
+.qtable tbody tr { border-bottom: 1px solid var(--border); }
+.qtable tbody tr:last-child { border-bottom: none; }
+.qtable tbody tr:hover { background: #f0f8f9; }
+.qtable tbody td { padding: 7px 12px; color: var(--text); font-weight: 500; }
+.qtable tbody td.r { text-align: right; }
+.pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 9px; font-weight: 700; }
+.pill-red   { background: var(--red-lt);   color: #991b1b; }
+.pill-green { background: var(--green-lt); color: #166534; }
+.pill-amber { background: var(--amber-lt); color: #92400e; }
+
+.scroll-table { max-height: 420px; overflow-y: auto; }
+.scroll-table thead th { position: sticky; top: 0; z-index: 2; }
+
+.day-note { font-size: 11.5px; color: var(--text); border-left: 3px solid var(--red); padding: 10px 14px; background: var(--red-lt); border-radius: 0 6px 6px 0; margin-bottom: 16px; font-weight: 500; line-height: 1.65; }
+.day-note strong { color: #7f1d1d; }
+
+.legend-row { display: flex; gap: 6px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid var(--border); background: #fafbfc; }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 99px; font-size: 10px; font-weight: 700; }
+.dot  { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.b-nh { background: var(--red-lt); color: #991b1b; } .d-nh { background: var(--red); }
+.b-h  { background: var(--green-lt); color: #166534; } .d-h { background: var(--green); }
+
+.footer { text-align: center; font-size: 10px; color: var(--muted); padding: 20px 0 4px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; margin-top: 8px; }
+
+@media (max-width: 720px) {
+  .summary-row { grid-template-columns: repeat(2, 1fr); }
+  .two-col { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">CLA — ZCC Overflow Reconciliation</div>
+    <div class="header-sub">Eastern Time &nbsp;·&nbsp; Queue Log vs. Contact Center Journey</div>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">Aug 2 – 29, 2026</div>
+  </div>
+</div>
+<div class="alert-banner">
+  ⚠ &nbsp;<span><b>332 of 334 calls (99.4%)</b> that overflowed to CLA ZCC Overflow never reached an agent in the Contact Center journey log — including <b>113 calls the phone system itself logged as "Completed."</b> The queue system's own outcome labels are not reliable evidence a human ever answered.</span>
+</div>
+
+<div class="page">
+
+  <div class="summary-row">
+    <div class="sc crit">
+      <div class="sc-label">ZCC Overflow calls</div>
+      <div class="sc-value red">334</div>
+      <div class="sc-sub">Aug 2–29, 2026</div>
+    </div>
+    <div class="sc crit">
+      <div class="sc-label">Not handled by an agent</div>
+      <div class="sc-value red">332</div>
+      <div class="sc-sub">99.4% — per journey log</div>
+    </div>
+    <div class="sc crit">
+      <div class="sc-label">Logged "Completed," no agent</div>
+      <div class="sc-value red">113</div>
+      <div class="sc-sub">of 115 "Completed" calls</div>
+    </div>
+    <div class="sc">
+      <div class="sc-label">Worst day</div>
+      <div class="sc-value teal" style="font-size:18px">Sun 8/9</div>
+      <div class="sc-sub">60 overflow calls, 0 handled</div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="bar"></span>What "handled" means here</div>
+  <div class="day-note">
+    Matched every <strong>CLA ZCC Overflow</strong> call leg (queue historical detail, deduped by Call ID) to its
+    <strong>Global engagement ID</strong> in the Contact Center call journey export. A call counts as <strong>handled</strong>
+    only if the journey log shows it reaching <strong>CLA JP Clay's Park</strong> queue with an agent
+    (<strong>CLA Contact Center 1</strong>) assigned. Everything else — regardless of what the queue system
+    called it (Completed, Overflowed, Abandoned) — reached ZCC Overflow and then has no record of a live pickup.
+    Only 2 of 334 calls across the full period met that bar.
+  </div>
+
+  <div class="section-title"><span class="bar"></span>Daily overflow volume — handled vs. not handled</div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">CLA ZCC Overflow, by day</div>
+      <div class="panel-meta">26 days with overflow activity</div>
+    </div>
+    <div class="panel-body"><div class="chart-wrap-lg"><canvas id="trendChart"></canvas></div></div>
+    <div class="legend-row">
+      <span class="badge b-h"><span class="dot d-h"></span>Handled (agent assigned): 2</span>
+      <span class="badge b-nh"><span class="dot d-nh"></span>Not handled (no agent found): 332</span>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Day-by-day detail</div>
+        <div class="panel-meta">334 calls total</div>
+      </div>
+      <div class="scroll-table">
+        <table class="qtable">
+          <thead><tr>
+            <th>Date</th><th class="r">Total</th><th class="r">Completed</th><th class="r">Overflowed</th><th class="r">Abandoned</th><th class="r">Handled</th>
+          </tr></thead>
+          <tbody id="dayRows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title">Origin queue (before overflow)</div>
+        <div class="panel-meta">where these calls came from</div>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <table class="qtable">
+          <thead><tr><th>Queue</th><th class="r">Overflow calls</th><th class="r">Handled</th></tr></thead>
+          <tbody>
+            <tr><td><strong>In Park</strong></td><td class="r">114</td><td class="r"><span class="pill pill-amber">1</span></td></tr>
+            <tr><td><strong>Modify Reservation</strong></td><td class="r">107</td><td class="r"><span class="pill pill-red">0</span></td></tr>
+            <tr><td><strong>New Reservation</strong></td><td class="r">78</td><td class="r"><span class="pill pill-red">0</span></td></tr>
+            <tr><td><strong>Water Park</strong></td><td class="r">34</td><td class="r"><span class="pill pill-amber">1</span></td></tr>
+            <tr><td><strong>ZCC Overflow (looped)</strong></td><td class="r">1</td><td class="r"><span class="pill pill-red">0</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel-header" style="border-top:1px solid var(--border)">
+        <div class="panel-title">Day of week (handled)</div>
+      </div>
+      <div class="panel-body" style="padding:0">
+        <table class="qtable">
+          <thead><tr><th>Day</th><th class="r">Calls</th><th class="r">Handled</th></tr></thead>
+          <tbody>
+            <tr><td>Monday</td><td class="r">24</td><td class="r">0</td></tr>
+            <tr><td>Tuesday</td><td class="r">26</td><td class="r">0</td></tr>
+            <tr><td>Wednesday</td><td class="r">12</td><td class="r">0</td></tr>
+            <tr><td>Thursday</td><td class="r">34</td><td class="r">1</td></tr>
+            <tr><td>Friday</td><td class="r">91</td><td class="r">1</td></tr>
+            <tr><td>Saturday</td><td class="r">48</td><td class="r">0</td></tr>
+            <tr><td>Sunday</td><td class="r">99</td><td class="r">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-title"><span class="bar"></span>Context — full CLA call volume, same period</div>
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title">Primary queue totals (Aug 2–29)</div>
+      <div class="panel-meta">3,149 calls · 581 overflowed onward</div>
+    </div>
+    <div class="panel-body" style="padding:0">
+      <table class="qtable">
+        <thead><tr><th>Queue</th><th class="r">Total</th><th class="r">Completed</th><th class="r">Overflowed</th><th class="r">Abandoned</th></tr></thead>
+        <tbody>
+          <tr><td><strong>In Park</strong></td><td class="r">907</td><td class="r">701</td><td class="r">207</td><td class="r">113</td></tr>
+          <tr><td><strong>New Reservation</strong></td><td class="r">772</td><td class="r">635</td><td class="r">132</td><td class="r">82</td></tr>
+          <tr><td><strong>Modify Reservation</strong></td><td class="r">625</td><td class="r">560</td><td class="r">154</td><td class="r">18</td></tr>
+          <tr><td><strong>Water Park</strong></td><td class="r">366</td><td class="r">301</td><td class="r">60</td><td class="r">40</td></tr>
+          <tr><td><strong>Festivals</strong></td><td class="r">145</td><td class="r">76</td><td class="r">28</td><td class="r">41</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="footer">Northgate Resorts &nbsp;·&nbsp; CLA ZCC Overflow Reconciliation &nbsp;·&nbsp; Aug 2 – 29, 2026 &nbsp;·&nbsp; Eastern Time</div>
+</div>
+
+<script>
+const DAILY = [{"date": "2026-08-02", "dow": "Sunday", "total": 19, "handled": 0, "not_handled": 19, "completed": 9, "overflowed": 5, "abandoned": 5, "primary_total": 134}, {"date": "2026-08-03", "dow": "Monday", "total": 6, "handled": 0, "not_handled": 6, "completed": 4, "overflowed": 2, "abandoned": 0, "primary_total": 169}, {"date": "2026-08-04", "dow": "Tuesday", "total": 9, "handled": 0, "not_handled": 9, "completed": 4, "overflowed": 2, "abandoned": 3, "primary_total": 163}, {"date": "2026-08-05", "dow": "Wednesday", "total": 3, "handled": 0, "not_handled": 3, "completed": 1, "overflowed": 1, "abandoned": 1, "primary_total": 150}, {"date": "2026-08-06", "dow": "Thursday", "total": 11, "handled": 0, "not_handled": 11, "completed": 7, "overflowed": 3, "abandoned": 1, "primary_total": 164}, {"date": "2026-08-07", "dow": "Friday", "total": 30, "handled": 0, "not_handled": 30, "completed": 9, "overflowed": 13, "abandoned": 8, "primary_total": 195}, {"date": "2026-08-08", "dow": "Saturday", "total": 23, "handled": 0, "not_handled": 23, "completed": 15, "overflowed": 6, "abandoned": 2, "primary_total": 170}, {"date": "2026-08-09", "dow": "Sunday", "total": 60, "handled": 0, "not_handled": 60, "completed": 13, "overflowed": 27, "abandoned": 20, "primary_total": 194}, {"date": "2026-08-10", "dow": "Monday", "total": 14, "handled": 0, "not_handled": 14, "completed": 6, "overflowed": 6, "abandoned": 2, "primary_total": 144}, {"date": "2026-08-11", "dow": "Tuesday", "total": 13, "handled": 0, "not_handled": 13, "completed": 5, "overflowed": 5, "abandoned": 3, "primary_total": 120}, {"date": "2026-08-12", "dow": "Wednesday", "total": 6, "handled": 0, "not_handled": 6, "completed": 2, "overflowed": 3, "abandoned": 1, "primary_total": 117}, {"date": "2026-08-13", "dow": "Thursday", "total": 16, "handled": 0, "not_handled": 16, "completed": 6, "overflowed": 5, "abandoned": 5, "primary_total": 166}, {"date": "2026-08-14", "dow": "Friday", "total": 21, "handled": 0, "not_handled": 21, "completed": 5, "overflowed": 11, "abandoned": 5, "primary_total": 183}, {"date": "2026-08-15", "dow": "Saturday", "total": 6, "handled": 0, "not_handled": 6, "completed": 2, "overflowed": 3, "abandoned": 1, "primary_total": 101}, {"date": "2026-08-16", "dow": "Sunday", "total": 17, "handled": 0, "not_handled": 17, "completed": 3, "overflowed": 6, "abandoned": 8, "primary_total": 83}, {"date": "2026-08-17", "dow": "Monday", "total": 4, "handled": 0, "not_handled": 4, "completed": 1, "overflowed": 1, "abandoned": 2, "primary_total": 55}, {"date": "2026-08-18", "dow": "Tuesday", "total": 2, "handled": 0, "not_handled": 2, "completed": 0, "overflowed": 1, "abandoned": 1, "primary_total": 73}, {"date": "2026-08-19", "dow": "Wednesday", "total": 3, "handled": 0, "not_handled": 3, "completed": 0, "overflowed": 3, "abandoned": 0, "primary_total": 46}, {"date": "2026-08-20", "dow": "Thursday", "total": 6, "handled": 1, "not_handled": 5, "completed": 3, "overflowed": 3, "abandoned": 0, "primary_total": 85}, {"date": "2026-08-21", "dow": "Friday", "total": 17, "handled": 0, "not_handled": 17, "completed": 5, "overflowed": 6, "abandoned": 6, "primary_total": 128}, {"date": "2026-08-22", "dow": "Saturday", "total": 10, "handled": 0, "not_handled": 10, "completed": 3, "overflowed": 4, "abandoned": 3, "primary_total": 98}, {"date": "2026-08-23", "dow": "Sunday", "total": 3, "handled": 0, "not_handled": 3, "completed": 0, "overflowed": 3, "abandoned": 0, "primary_total": 50}, {"date": "2026-08-25", "dow": "Tuesday", "total": 2, "handled": 0, "not_handled": 2, "completed": 1, "overflowed": 1, "abandoned": 0, "primary_total": 40}, {"date": "2026-08-27", "dow": "Thursday", "total": 1, "handled": 0, "not_handled": 1, "completed": 1, "overflowed": 0, "abandoned": 0, "primary_total": 61}, {"date": "2026-08-28", "dow": "Friday", "total": 23, "handled": 1, "not_handled": 22, "completed": 5, "overflowed": 6, "abandoned": 12, "primary_total": 101}, {"date": "2026-08-29", "dow": "Saturday", "total": 9, "handled": 0, "not_handled": 9, "completed": 5, "overflowed": 1, "abandoned": 3, "primary_total": 73}];
+
+const dayRows = document.getElementById('dayRows');
+DAILY.forEach(d=>{
+  const dt = new Date(d.date+'T12:00:00');
+  const label = dt.toLocaleDateString('en-US',{month:'short',day:'numeric'}) + ' (' + d.dow.slice(0,3) + ')';
+  const handledPill = d.handled>0 ? `<span class="pill pill-amber">${d.handled}</span>` : `<span class="pill pill-red">0</span>`;
+  dayRows.innerHTML += `<tr>
+    <td>${label}</td>
+    <td class="r">${d.total}</td>
+    <td class="r">${d.completed}</td>
+    <td class="r">${d.overflowed}</td>
+    <td class="r">${d.abandoned}</td>
+    <td class="r">${handledPill}</td>
+  </tr>`;
+});
+
+const labels = DAILY.map(d=>{
+  const dt = new Date(d.date+'T12:00:00');
+  return dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+});
+
+new Chart(document.getElementById('trendChart'), {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [
+      {label:'Handled', data: DAILY.map(d=>d.handled), backgroundColor:'#16a34a', borderRadius:3, stack:'s'},
+      {label:'Not handled', data: DAILY.map(d=>d.not_handled), backgroundColor:'#c0392b', borderRadius:3, stack:'s'}
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 9, family: 'Montserrat', weight: '600' }, color: '#6b7f86', maxRotation: 90, minRotation: 90 } },
+      y: { grid: { color: 'rgba(0,39,45,.05)' }, ticks: { font: { size: 9, family: 'Montserrat', weight: '600' }, color: '#6b7f86' } }
+    }
+  }
+});
+</script>
+</body>
+</html>
